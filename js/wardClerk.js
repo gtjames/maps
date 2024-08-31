@@ -1,4 +1,4 @@
-import { standardizeNames, setGPSandNotes } from './wardList.js';
+import { standardizeNames } from './wardList.js';
 import { whoWhatWhere } from './whoWhatWhere.js';
 import { units, colors } from './data.js';
 
@@ -15,16 +15,9 @@ let onDisplay = [];
 let buildings;
 let currentWard;
 
-// var greenIcon = new LeafIcon({iconUrl: 'images/dot-green.png'}),
-//     redIcon = new LeafIcon({iconUrl: 'images/dot-red.png'}),
-//     orangeIcon = new LeafIcon({iconUrl: 'images/dot-orange.png'});
 let northOf, southOf, eastOf, westOf, northEastOf, northWestOf, southWestOf, southEastOf;
 let compass = [];
 let wardCenter = [(32.596108 + 33.5250081) / 2, (-95.20825 + -97.10875730317615) / 2];
-// top left        top     lat: 33.52500818093751      lng: -97.10875730317615 left
-// top right       top     lat: 33.49752772973407      lng: -95.20825442135659 right
-// bottom right    bottom  lat: 32.61397844219075      lng: -95.23022555293831 right
-// bottom left     bottom  lat: 32.59610812687618      lng: -97.11974286896704 left
 
 let outline;
 let results = [];
@@ -34,57 +27,23 @@ let cbSis        = document.querySelector("#Sis");
 let cbBro        = document.querySelector("#Bro");
 let cbYW         = document.querySelector("#YW");
 let cbAP         = document.querySelector("#AP");
-let cbActive     = document.querySelector("#Active");
 let cbPrimary    = document.querySelector("#Primary");
-let cbNotActive  = document.querySelector("#NotActive");
-let cbConvert    = document.querySelector("#Convert");
-let cbEndowed    = document.querySelector("#Endowed");
-let cbNotEndowed = document.querySelector("#NotEndowed");
-let cbRM         = document.querySelector("#RM");
-let cbInstitute  = document.querySelector("#Institute");
-let cbSealed     = document.querySelector("#Sealed");
-let cbMinBro     = document.querySelector("#MinBro");
-let cbMinSis     = document.querySelector("#MinSis");
-let cbNotMinBro  = document.querySelector("#NotMinBro");
-let cbNotMinSis  = document.querySelector("#NotMinSis");
 
 let txtName      = document.querySelector("#Name");
 let txtAddress1  = document.querySelector("#Address1");
 let txtZip       = document.querySelector("#Zip");
 let txtCity      = document.querySelector("#City");
-let txtAge       = document.querySelector("#Age");
-let txtBDay      = document.querySelector("#BDay");
-let txtPrsthd    = document.querySelector("#Priesthood");
-let txtNotes     = document.querySelector("#Notes");
-let txtCallings  = document.querySelector("#Callings");
-let txtRec       = document.querySelector("#Recommend");
-let txtRecType   = document.querySelector("#RecType");
-let txtRecExpire = document.querySelector("#RecExpire");
-let txtMovedIn   = document.querySelector("#MovedIn");
-let txtBaptized  = document.querySelector("#Baptized");
 
-let popSpeak     = document.querySelector("#popSpeak");
 let popAddress   = document.querySelector("#popAddress");
-let popStats     = document.querySelector("#popStats");
 let popContact   = document.querySelector("#popContact");
-let popMbrInfo   = document.querySelector("#popMbrInfo");
-let popTemple    = document.querySelector("#popTemple");
-let popMinisters = document.querySelector("#popMinisters");
-let popLatLong   = document.querySelector("#popLatLong");
 let updates      = document.querySelector("#updates");
 let cbTags       = document.querySelector("#nameTags");
-let noGPS        = document.querySelector('#getZeroGPS');
-let getLatLong   = document.querySelector('#getLatLong');
 
 document.querySelector('#plot'        ).addEventListener('click', plotMembers);
 document.querySelector('#remove'      ).addEventListener('click', removeAllPoints);
 document.querySelector('#include'     ).addEventListener('click', includeAll);
 document.querySelector("#distList"    ).addEventListener('click', newDistances);
-document.querySelector('#addBuildings').addEventListener('click', testBuilding);
-document.querySelector('#switchWards' ).addEventListener('click', switchWards);
 
-noGPS     .addEventListener('click', getZeroGPS);
-getLatLong.addEventListener('click', getGPS);
 updates   .addEventListener('click', popupName);
 
 var broIcon    = L.icon({ iconUrl: 'images/bro.png',    iconSize: [15, 10] });
@@ -100,16 +59,6 @@ document.getElementById("map").style.zIndex = "10";
 loadData();
 
 function loadData() {
-    if (+document.location.port === 3000) {
-        fetch('http://127.0.0.1:3000/members/get/9819187')
-            .then(data => data.json())
-            .then(mbrs => initPage(mbrs.data));
-    } else {
-        initPage(standardizeNames(whoWhatWhere.members), whoWhatWhere.ward);
-    }
-}
-
-function switchWards() {
     initPage(standardizeNames(whoWhatWhere.members), whoWhatWhere.ward);
 }
 
@@ -121,7 +70,6 @@ function initPage(data, ward) {
     if (savedGPS === null) savedGPS = fallback;
 
     removeAllPoints();
-    setGPSandNotes(theWard, savedGPS, null);
     wardBoundary = findBoundary(theWard);
     buildings = addBuildings([])
     theWard = addBuildings(theWard);
@@ -147,25 +95,12 @@ function clearUpdate() {
     if (outline) outline.remove();
 }
 
-
-function testBuilding() {
-    buildings.forEach(e => plotAddress(e));
-    getDistancesFrom(1, buildings, true);
-}
-
 function addBuildings(list) {
-    let defaults = {
-        address2: '',
-        age: '', gender: '', baptized: '', callings: '', birthday: '', email: '',
-        institute: '', convert: '', endowed: '', RM: '', sealed: '', movedIn: '', priesthood: '',
-        recExpire: '', recStatus: '', recType: '', minBros: '', minSiss: '', notes: 'Active'
-    };
+    let defaults = { address2: '', age: '', email: '' };
 
     let zeros = theWard.filter(m => m.lat === 0).length;
     let avgLat = theWard.reduce((tot, w) => w.lat + tot, 0) / (theWard.length - zeros);
     let avgLng = theWard.reduce((tot, w) => w.long + tot, 0) / (theWard.length - zeros);
-
-    list.unshift({ ...{ id: 100, first: '100', last: 'CENTER', name: "CENTER", lat: avgLat, long: avgLng, city: '', address1: '', }, ...defaults });
 
     units.forEach((unit, id) =>
         list.unshift({
@@ -241,16 +176,6 @@ function setLocation(loc) {
     });
 }
 
-// var LeafIcon = L.Icon.extend({
-//     options: {
-//         shadowUrl: 'images/dot-shadow.png',
-//         iconSize:     [38, 95],
-//         shadowSize:   [50, 64],
-//         iconAnchor:   [22, 94],
-//         shadowAnchor: [4, 62],
-//         popupAnchor:  [-3, -76]
-//     }
-// });
 function onMapClick(e) {
     let shortList = results.filter(m => +m.id > 100)
     wardCenter[0] = e.latlng.lat;
@@ -329,12 +254,6 @@ function whosThere(e) {
         outline = L.rectangle(bounds, { color: color, weight: 5 }).on('click', e => console.info(e)).addTo(map);
 }
 
-// Array (2)
-// 0,0 32.596108
-// 0,1 -95.20825
-// 1,0 33.52500818093751
-// 1.1 -97.10875730317615
-
 function findBoundary(section) {
     let dim = { northLat: wardCenter[0], southLat: wardCenter[0], westLong: wardCenter[1], eastLong: wardCenter[1] };
     section.forEach(m => {
@@ -348,11 +267,6 @@ function findBoundary(section) {
     let bounds = [[dim.northLat, dim.westLong], [dim.southLat, dim.eastLong]];
     return bounds
 }
-
-// top left        top     lat: 33.52500818093751      lng: -97.10875730317615 left
-// top right       top     lat: 33.49752772973407      lng: -95.20825442135659 right
-// bottom right    bottom  lat: 32.61397844219075      lng: -95.23022555293831 right
-// bottom left     bottom  lat: 32.59610812687618      lng: -97.11974286896704 left
 
 function popupName(e) {
     if (e.target.dataset.id) {
@@ -381,62 +295,17 @@ function plotMembers(event) {
     if (cbYW.checked        ) results = results.filter(r =>   r.gender === 'F' && r.age >= 11 && r.age < 18);
     if (cbAP.checked        ) results = results.filter(r =>   r.gender === 'M' && r.age >= 11 && r.age < 18);
     if (cbPrimary.checked   ) results = results.filter(r =>   r.age < 12);
-    if (cbActive.checked    ) results = results.filter(r =>   r.notes === 'Active');
-    if (cbNotActive.checked ) results = results.filter(r =>   r.notes !== 'Active');
-    if (cbEndowed.checked   ) results = results.filter(r =>   r.endowed);
-    if (cbNotEndowed.checked) results = results.filter(r => ! r.endowed);
-    if (cbConvert.checked   ) results = results.filter(r =>   r.convert);
-    if (cbRM.checked        ) results = results.filter(r =>   r.RM);
-    if (cbInstitute.checked ) results = results.filter(r =>   r.institute);
-    if (cbSealed.checked    ) results = results.filter(r =>   r.sealed);
-    if (cbMinBro.checked    ) results = results.filter(r =>   r.hasMinBros);
-    if (cbMinSis.checked    ) results = results.filter(r =>   r.hasMinSiss);
-    if (cbNotMinBro.checked ) results = results.filter(r => ! r.hasMinBros);
-    if (cbNotMinSis.checked ) results = results.filter(r => ! r.hasMinSiss);
 
     if (txtName     .value.length > 0) results = results.filter(r => matches(r.name, txtName));
     if (txtAddress1 .value.length > 0) results = results.filter(r => matches(r.address1, txtAddress1));
     if (txtCity     .value.length > 0) results = results.filter(r => matches(r.city, txtCity));
     if (txtZip      .value.length > 0) results = results.filter(r => r.zip.indexOf(txtZip.value) >= 0);
 
-    if (txtPrsthd   .value.length > 0) results = results.filter(r => matches(r.priesthood, txtPrsthd));
-    if (txtNotes    .value.length > 0) results = results.filter(r => matches(r.notes, txtNotes));
-    if (txtCallings .value.length > 0) results = results.filter(r => matches(r.callings, txtCallings));
-    if (txtBDay     .value.length > 0) results = results.filter(r => matches(r.birthday, txtBDay));
-    if (txtRec      .value.length > 0) results = results.filter(r => matches(r.recStatus, txtRec));
-    if (txtRecType  .value.length > 0) results = results.filter(r => matches(r.recType, txtRecType));
-    if (txtRecExpire.value.length > 0) results = results.filter(r => new Date(r.recExpire) < calcDate(1 * txtRecExpire.value));
-    if (txtMovedIn  .value.length > 0) results = results.filter(r => new Date(r.movedIn) > calcDate(-1 * txtMovedIn.value));
-    if (txtBaptized .value.length > 0) results = results.filter(r => new Date(r.baptized) > calcDate(-1 * txtBaptized.value));
-
-    if (txtAge.value.length > 0) {
-        let age = txtAge.value;
-        let ages = age.split("&");
-        results = agesBetween(ages[0], results);
-        if (ages.length === 2)
-            results = agesBetween(ages[1], results);
-    }
     clearUpdate();
     document.getElementById("count").innerText = `${results.length} Found`;
     onDisplay = [];
     results.forEach(e => plotAddress(e))
 }
-
-function agesBetween(age, list) {
-    let number = +age.substring(age.search(/\d/));
-    let operator = age.substring(0, age.search(/\d/));
-    switch (operator) {
-        case "<":  list = list.filter(r => +r.age < number); break;
-        case "<=": list = list.filter(r => +r.age <= number); break;
-        case "":             //  just the number was entered
-        case "=":
-        case "==": list = list.filter(r => +r.age == number); break;
-        case ">=": list = list.filter(r => +r.age >= number); break;
-        case ">":  list = list.filter(r => +r.age > number); break;
-    }
-    return list;
-}
-
 function matches(mbr, input) {
     return mbr.toLowerCase().indexOf(input.value.toLowerCase()) >= 0;
 }
@@ -499,54 +368,9 @@ function createPopup(who) {
     let msg = `${who.first} ${who.last}<hr><p>`;
     if (who.id <= 100) return msg;
     if (popAddress  .checked) msg += `Address:${space}${who.address1} ${who.address2 ?? ""}, ${who.city}<p>`;
-    if (popStats    .checked) msg += `Stats:${space}Age: ${who.age}, ${who.gender}${space}B-Day: ${who.birthday}<p>`;
-    if (popContact  .checked) msg += `Conact:${space}eMail: ${who.email}${space}Phn: ${who.phone}${space}Notes: ${who.notes}<p>`;
-    if (popMbrInfo  .checked) msg += `Mbr Info:${space}Callings: ${who.callings}${space}Bap: ${who.baptized} Convert: ${who.convert}${space}Mission: ${who.RM}${space}Sealed: ${who.sealed} Prsthd: ${who.priesthood.length == 0 ? "---" : who.priesthood}${space}Moved In: ${who.movedIn} Institute: ${who.institute}<p>`;
-    if (popTemple   .checked) msg += `Temple:${space}Endowed: ${who.endowed} Rec Exp: ${who.recExpire}${space}Type: ${who.recType}${space}Status: ${who.recStatus}<p>`;
-    if (popMinisters.checked) msg += `Ministering:${space}Bro: ${who.minBros}${space}Sis: ${who.minSiss}<p>`;
-    if (popLatLong  .checked) msg += `Lat: ${who.lat.toFixed(3)} Long: ${who.long.toFixed(3)}<p>`;
+    if (popContact  .checked) msg += `Conact:${space}eMail: ${who.email}${space}Phn: ${who.phone}${space}`;
 
     return msg;
-}
-
-function talkToMe(text) {
-    let speech = new SpeechSynthesisUtterance();
-    speech.lang = "en-US";
-    speech.text = text;
-    speech.volume = speech.rate = speech.pitch = 1;
-    window.speechSynthesis.speak(speech);
-}
-
-//  getGPS
-//      Loop through member addresses and convert to GPS coords
-function getGPS(event) {
-    event.preventDefault();
-
-    getLatLong.classList.remove('btn-danger');
-    getLatLong.classList.add('btn-primary');
-
-    if (localStorage.getItem('gps-' + currentWard) === null) {
-        if (savedGPS.length > 0) {
-            let resp = confirm(`Address List has ${savedGPS.length} members`);
-            if (!resp) return;
-            localStorage.setItem('gps-' + currentWard, JSON.stringify(savedGPS));
-            setGPSandNotes(theWard, savedGPS, null);
-        } else {
-            theWard.forEach(e => getLongLatFromAdrs(e.name, e.address1 + ', ' + e.city + ', TX', addAllToWard))
-        }
-    } else {
-        savedGPS = JSON.parse(localStorage.getItem('gps-' + currentWard));
-        setGPSandNotes(theWard, savedGPS, null);
-    }
-}
-
-function addAllToWard(adrs, name, gps) {
-    savedGPS.push({
-        name: name, adrs: adrs,
-        lat: gps.results[0].geometry.location.lat,
-        long: gps.results[0].geometry.location.lng
-    });
-    L.marker([gps.results[0].geometry.location.lng, gps.results[0].geometry.location.lng]).addTo(map);
 }
 
 async function getLongLatFromAdrs(name, address, addToWard) {
@@ -554,38 +378,6 @@ async function getLongLatFromAdrs(name, address, addToWard) {
     const response = await fetch(url);
     const gps = await response.json();
     getLatLong.innerText = `${name} GPS found`;
-}
-
-function getZeroGPS() {
-    noGPS.classList.remove('btn-danger');
-    noGPS.classList.add('btn-primary');
-    onDisplay = [];
-
-    let empty = theWard.filter(e => e.lat == 0 || e.long == 0);
-    noGPS.innerText = `${empty.length} w/o GPS `;
-    if (empty.length === 0) return;
-    empty.forEach(e => {
-        displayUpdate(`${e.name} ${e.lat} ${e.long}`, e);
-        getLongLatFromAdrs(e.name, e.address1 + ', ' + e.city + ', TX', addOneToWard);
-    });
-}
-
-function addOneToWard(adrs, name, gps) {
-    let names = savedGPS.filter(g => g.name === name)
-    if (names.length > 0) {
-        names[0].address1 = adrs;
-        names[0].lat = gps.results[0].geometry.location.lat;
-        names[0].long = gps.results[0].geometry.location.lng;
-    } else {
-        savedGPS.push({
-            name: name, address1: adrs,
-            lat: gps.results[0].geometry.location.lat,
-            long: gps.results[0].geometry.location.lng
-        });
-    }
-    localStorage.setItem('gps-' + currentWard, JSON.stringify(savedGPS));
-    L.marker([gps.results[0].geometry.location.lng, gps.results[0].geometry.location.lng]).addTo(map);
-    setGPSandNotes(theWard, savedGPS, null);
 }
 
 function newDistances(e) {

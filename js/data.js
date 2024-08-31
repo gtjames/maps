@@ -3,27 +3,11 @@ export let searchForText = [
     { type: "text",   id: "Address1",    name: "address1",    placeholder: "Address",               },
     { type: "text",   id: "Zip",         name: "zip",         placeholder: "Zip",                   },
     { type: "text",   id: "City",        name: "city",        placeholder: "City",                  },
-    { type: "text",   id: "Age",         name: "age",         placeholder: "Age",                   },
-    { type: "text",   id: "BDay",        name: "bDay",        placeholder: "BDay",                  },
-    { type: "text",   id: "Notes",       name: "notes",       placeholder: "Notes",                 },
-    { type: "text",   id: "Callings",    name: "callings",    placeholder: "Callings",              },
-    { type: "text",   id: "Priesthood",  name: "priesthood",  placeholder: "Priesthood",            },
-    { type: "text",   id: "Recommend",   name: "recommend",   placeholder: "Recommend Status",      },
-    { type: "text",   id: "RecType",     name: "recType",     placeholder: "Recommend Type",        },
-    { type: "number", id: "RecExpire",   name: "recExpire",   placeholder: "Rec Expiring in x days" },
-    { type: "number", id: "MovedIn",     name: "movedIn",     placeholder: "Moved In (days ago)",   },
-    { type: "number", id: "Baptized",    name: "baptized",    placeholder: "Baptized (days ago)",   }
 ];
 
 export let popupText = [
-    { id: "popSpeak",     label: "popSpeak",     innerText: "Speak",     },
     { id: "popAddress",   label: "popAddress",   innerText: "Address",   },
-    { id: "popStats",     label: "popStats",     innerText: "Stats",     },
     { id: "popContact",   label: "popContact",   innerText: "Contact",   },
-    { id: "popMbrInfo",   label: "popMbrInfo",   innerText: "Member",    },
-    { id: "popTemple",    label: "popTemple",    innerText: "Temple",    },
-    { id: "popMinisters", label: "popMinisters", innerText: "Ministers", },
-    { id: "popLatLong",   label: "popLatLong",   innerText: "Lat/Long",  },
 ];
 
 export let checkForText = [
@@ -32,14 +16,6 @@ export let checkForText = [
 { name: "",          id: "YW",          innerText: "Youth Women",                },
 { name: "",          id: "AP",          innerText: "Aaronic Priesthood",         },
 { name: "",          id: "Primary",     innerText: "Primary",                    },
-{ name: "",          id: "Active",      innerText: "Active",           not: true },
-{ name: "endowed",   id: "Endowed",     innerText: "Endowed",          not: true },
-{ name: "convert",   id: "Convert",     innerText: "Convert",                    },
-{ name: "RM",        id: "RM",          innerText: "RM",                         },
-{ name: "institute", id: "Institute",   innerText: "Institute",                  },
-{ name: "sealed",    id: "Sealed",      innerText: "Sealed",                     },
-{ name: "",          id: "MinBro",      innerText: "Ministering Bro",  not: true },
-{ name: "",          id: "MinSis",      innerText: "Ministering Sis",  not: true },
 ];
 
 
@@ -53,9 +29,6 @@ export let units = [
 { first: "Denton",      last: "Ward ",            name: "Bishop Nielsen",             address1: "1100 West Mulberry Street",      city: "Denton",       zip: "76201",  lat: 33.213885, long: -97.144477, phone: "940-387-8882", iconUrl: "./images/otherYSAs.png",   },
 { first: "Fort Worth",  last: "Ward ",            name: "Bishop Seethaler",           address1: "2520 8th Avenue",                city: "Ft Worth",     zip: "76110",  lat: 32.714746, long: -97.344366, phone: "            ", iconUrl: "./images/otherYSAs.png",   },
 { first: "Frisco",      last: "Ward ",            name: "Bishop Parker",              address1: "11000 Eldorado Parkway",         city: "Frisco",       zip: "75035",  lat: 33.175234, long: -96.784828, phone: "469-362-6944", iconUrl: "./images/otherYSAs.png",   },
-{ first: "Hurst",       last: "Ward ",            name: "Bishop Vimahi",              address1: "5312 Bransford Road",            city: "Colleyville",  zip: "76034",  lat: 32.885906, long: -97.162012, phone: "            ", iconUrl: "./images/otherYSAs.png",   },
-{ first: "Rockwall",    last: "Branch, Heath",    name: "Branch President Willman",   address1: "6819 South Fm 549",              city: "Heath",        zip: "75032",  lat: 32.860965, long: -96.444691, phone: "            ", iconUrl: "./images/otherYSAs.png",   },
-{ first: "Weatherford", last: "Branch ",          name: "Branch President Connelly",  address1: "2251 Bethel Road",               city: "Weatherford",  zip: "76087",  lat: 32.721649, long: -97.809414, phone: "            ", iconUrl: "./images/otherYSAs.png",   },
 ];
 
 export let colors = [
