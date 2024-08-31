@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Gary T. James">
+    <title>Ward Clerk 1.0</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <link  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="./css/ward.css">
+  </head>
+  <body>
+
+<div class="info panel panel-default">
+  <a id="shrink" class="btn btn-warning collapsed" data-bs-toggle="collapse" href="#collapse" role="button" aria-expanded="false" aria-controls="collapse">x</a>
+  <span id="count">0</span>
+  <div class="collapse" id="collapse">
+    <div class="panel-body scroll bg-info-subtle copyable">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+      </svg>
+      <ol id="updates"> </ol>
+    </div>
+  </div>
+</div>
+
+  <div id="main">
+    <div id="map"></div>
+  </div>
+
+<nav class="navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
+  <div class="container-fluid">
+      <a class="navbar-brand" href="#">Ward Clerk</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <div class="dropup">
+        <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Search For:
+        </button>
+        <ul id="searchFor" class="dropdown-menu">
+          <li><h1 class="dropdown-header">Search For:</h1></li>
+        </ul>
+      </div>
+
+      <div class="dropup">
+          <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Check For:
+          </button>
+          <ul id="checkFor" class="dropdown-menu">
+              <li><h1 class="dropdown-header">Check For:</h1></li>
+          </ul>
+        </div>
+
+        <div class="dropup">
+          <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Include in Popup:
+          </button>
+          <ul id="popupInfo" class="dropdown-menu">
+            <li><h1 id="include" class="dropdown-header">Include in Popup:</h1></li>
+          </ul>
+        </div>
+
+      <table>
+        <tr><td>
+          <div class="form-check form-switch"> 
+            <input id="nameTags" class="form-check-input" type="checkbox" role="switch">
+            <label class="label" for="nameTags"><span class="badge rounded-pill text-bg-primary">Tags</span></label>
+            </div>
+        </td></tr>
+      </table>
+
+      <button id="plot"     class="btn btn-success navbar-btn">Plot Addresses</button>
+      <button id="remove"   class="btn btn-warning navbar-btn">Clear</button>
+    </div>
+
+    <button id="switchWards"  class="btn btn-info   navbar-btn float-end ">Switch Wards</button>
+    <button id="getLatLong"   class="btn btn-danger navbar-btn float-end ">GPS from Adrs</button>
+    <button id="getZeroGPS"   class="btn btn-danger navbar-btn float-end ">Missing GPS</button>
+    <button id="newAddress"   class="btn btn-primary" type="button">New Member</button>
+  </div>
+</nav>
+<!-- Modal -->
+<div class="modal" id="myModal" tabindex="1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content bg-info-subtle">
+      <div class="modal-header bg-info-subtle">
+        <h1 class="modal-title fs-5" id="modalTitle">Distance From</h1>
+        <button type="button" id="addBuildings" class="btn btn-info">Add Buildings</button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body bg-secondary-subtle pt-0">
+        <table class="table sortable copyable table-hover table-striped table-ward">
+          <thead class="table-secondary"><tr>
+            <th>To First
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+                 <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                </svg>
+            </th>
+            <th>Last</th><th>Distance</th></tr></thead>
+          <tbody id="distList"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer bg-info-subtle">
+        <div id="totalDist"></div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./js/wardClerk.js" type="module"></script>
+  <script src="./js/sortable.js"></script>
+</body>
+</html>
